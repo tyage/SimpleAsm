@@ -30,15 +30,15 @@ module SimpleAsm
     PREFIX_CODE = 0b11
 
     class << self
-      def names
-        NAMES
+      def names(key=nil)
+        key ? NAMES[key] : NAME_TO_OP.keys
       end
     end
 
-    def initialize(name, rs, rd, d)
-      @rs = rs || 0
-      @rd = rd || 0
-      @d = d || 0
+    def initialize(name, args)
+      @rs = args[:rs] || 0
+      @rd = args[:rd] || 0
+      @d = args[:d] || 0
       @op3 = name_to_op(name)
     end
 

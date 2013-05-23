@@ -1,6 +1,6 @@
 require 'simple_asm/inst_factory'
-require 'simple_asm/inst'
 require 'simple_asm/inst_arithmetic'
+require 'simple_asm/inst_load_store'
 
 module SimpleAsm
   class Simple
@@ -17,21 +17,28 @@ module SimpleAsm
       # pending
     end
 
-    InstArithmetic.names[:rd_rs].each do |name|
+    # TODO: このへんの重複をまとめる
+    InstArithmetic.names(:rd_rs).each do |name|
       define_method name do |rd, rs|
         add_inst(InstFactory.create(name, { :rs => rs, :rd => rd }))
       end
     end
 
-    InstArithmetic.names[:rd_d].each do |name|
+    InstArithmetic.names(:rd_d).each do |name|
       define_method name do |rd, d|
         add_inst(InstFactory.create(name, { :rd => rd, :d => d }))
       end
     end
 
-    InstArithmetic.names[:d].each do |name|
+    InstArithmetic.names(:d).each do |name|
       define_method name do |d|
         add_inst(InstFactory.create(name, { :d => d }))
+      end
+    end
+
+    InstLoadStore.names.each do |name|
+      define_method name do |ra, rb, d|
+        add_inst(InstFactory.create(name, { :ra => ra, :rb => rb, :d => d }))
       end
     end
 

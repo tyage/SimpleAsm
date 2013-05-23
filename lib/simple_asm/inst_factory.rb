@@ -1,18 +1,17 @@
 require "simple_asm/inst_arithmetic"
+require "simple_asm/inst_load_store"
 
 module SimpleAsm
   class InstFactory
     class << self
-      def create(name, args)
-        case name
-        when *InstArithmetic.names
-          create_arithmetic(name, args)
-        end
-      end
+      INST_CLASSES = [InstArithmetic, InstLoadStore]
 
-      private
-      def create_arithmetic(name, args)
-        InstArithmetic.new(name, args[:rs], args[:rd], args[:d])
+      def create(name, args)
+        INST_CLASSES.each do |klass|
+          if klass.names.include?(name)
+            return klass.new(name, args)
+          end
+        end
       end
     end
   end
