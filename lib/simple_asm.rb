@@ -33,8 +33,49 @@ module SimpleAsm
         end
       end
 
+      def define_label
+        define_method(:label) do |name|
+          @labels[name] = @insts.length
+        end
+      end
+
+      # 負方向のjmpのみ
+      def define_jmp
+        define_method(:jmp) do |name|
+          throw 'undefined label' unless @labels[name]
+          pc_plus_one = @insts.length
+          b 0, @labels[name] - pc_plus_one
+        end
+
+        define_method(:je) do |name|
+          throw 'undefined label' unless @labels[name]
+          pc_plus_one = @insts.length
+          be @labels[name] - pc_plus_one
+        end
+
+        define_method(:jlt) do |name|
+          throw 'undefined label' unless @labels[name]
+          pc_plus_one = @insts.length
+          blt @labels[name] - pc_plus_one
+        end
+
+        define_method(:jle) do |name|
+          throw 'undefined label' unless @labels[name]
+          pc_plus_one = @insts.length
+          ble @labels[name] - pc_plus_one
+        end
+
+        define_method(:jne) do |name|
+          throw 'undefined label' unless @labels[name]
+          pc_plus_one = @insts.length
+          bne @labels[name] - pc_plus_one
+        end
+      end
+
       def define_exts
         define_registers
+        define_label
+        define_jmp
         self.define(:zero, [])
       end
 
@@ -53,6 +94,7 @@ module SimpleAsm
 
     def initialize(&block)
       @insts = []
+      @labels = {}
       self.instance_eval(&block) if block
     end
 
