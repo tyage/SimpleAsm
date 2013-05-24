@@ -39,6 +39,10 @@ module SimpleAsm
       end
 
       alias_method :use, :define_with_inst
+
+      def define_function(name, &block)
+        define_method(name, &block)
+      end
     end
 
     use InstArithmetic
