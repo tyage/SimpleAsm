@@ -1,9 +1,33 @@
 require 'simple_asm/inst_factory'
 require 'simple_asm/inst_arithmetic'
 require 'simple_asm/inst_load_store'
+require 'simple_asm/inst_li_branch'
 
 module SimpleAsm
   class Simple
+    class << self
+      def define(name, symbols)
+        define_method name do |*args|
+          factory_args = Hash[*symbols.zip(args).flatten(1)]
+          add_inst(InstFactory.create(name, factory_args))
+        end
+      end
+
+      def define_with_inst(inst_class)
+        inst_class.args_to_names_map.each do |args, names|
+          names.each do |name|
+            self.define(name, args)
+          end
+        end
+      end
+
+      alias_method :use, :define_with_inst
+    end
+
+    use InstArithmetic
+    use InstLoadStore
+    use InstLiBranch
+
     def initialize(&block)
       @insts = []
       self.instance_eval(&block)
@@ -15,31 +39,6 @@ module SimpleAsm
 
     def to_mif
       # pending
-    end
-
-    # TODO: このへんの重複をまとめる
-    InstArithmetic.names(:rd_rs).each do |name|
-      define_method name do |rd, rs|
-        add_inst(InstFactory.create(name, { :rs => rs, :rd => rd }))
-      end
-    end
-
-    InstArithmetic.names(:rd_d).each do |name|
-      define_method name do |rd, d|
-        add_inst(InstFactory.create(name, { :rd => rd, :d => d }))
-      end
-    end
-
-    InstArithmetic.names(:d).each do |name|
-      define_method name do |d|
-        add_inst(InstFactory.create(name, { :d => d }))
-      end
-    end
-
-    InstLoadStore.names.each do |name|
-      define_method name do |ra, rb, d|
-        add_inst(InstFactory.create(name, { :ra => ra, :rb => rb, :d => d }))
-      end
     end
 
     private

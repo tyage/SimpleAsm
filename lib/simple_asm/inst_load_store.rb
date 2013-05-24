@@ -7,11 +7,19 @@ module SimpleAsm
     NAME_TO_OP = {
       :ld => 0b00,
       :st => 0b01
-    }
+    }.freeze
+
+    ARGS_TO_NAMES_MAP = {
+      [:ra, :rb, :d] => [:ld, :st]
+    }.freeze
 
     class << self
       def names
         NAME_TO_OP.keys
+      end
+
+      def args_to_names_map
+        ARGS_TO_NAMES_MAP
       end
     end
 

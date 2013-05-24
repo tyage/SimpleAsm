@@ -19,19 +19,23 @@ module SimpleAsm
       :in => 0b1100,
       :out => 0b1101,
       :hlt => 0b1111,
-    }
+    }.freeze
 
-    NAMES = {
-      :rd_rs => [:add, :sub, :and, :or, :xor, :cmp, :mov],
-      :rd_d => [:sll, :slr, :srl, :sra, :in, :out],
-      :d    => [:hlt]
-    }
+    ARGS_TO_NAMES_MAP = {
+      [:rd, :rs] => [:add, :sub, :and, :or, :xor, :cmp, :mov],
+      [:rd, :s] => [:sll, :slr, :srl, :sra, :in, :out],
+      [:d]    => [:hlt]
+    }.freeze
 
     PREFIX_CODE = 0b11
 
     class << self
-      def names(key=nil)
-        key ? NAMES[key] : NAME_TO_OP.keys
+      def names
+        NAME_TO_OP.keys
+      end
+
+      def args_to_names_map
+        ARGS_TO_NAMES_MAP
       end
     end
 
