@@ -3,6 +3,7 @@ require 'simple_asm/inst_arithmetic'
 require 'simple_asm/inst_load_store'
 require 'simple_asm/inst_li_branch'
 require 'simple_asm/inst_zero'
+require 'simple_asm/inst_jmp'
 
 module SimpleAsm
   class Simple
@@ -16,7 +17,9 @@ module SimpleAsm
         end
       end
 
-      def define_with_inst(inst_class)
+      def use(inst_class)
+        InstFactory.register(inst_class)
+
         inst_class.args_to_names_map.each do |args, names|
           names.each do |name|
             self.define(name, args)
@@ -39,47 +42,13 @@ module SimpleAsm
         end
       end
 
-      # 負方向のjmpのみ
-      def define_jmp
-        define_method(:jmp) do |name|
-          throw 'undefined label' unless @labels[name]
-          pc_plus_one = @insts.length
-          b 0, @labels[name] - pc_plus_one
-        end
-
-        define_method(:je) do |name|
-          throw 'undefined label' unless @labels[name]
-          pc_plus_one = @insts.length
-          be @labels[name] - pc_plus_one
-        end
-
-        define_method(:jlt) do |name|
-          throw 'undefined label' unless @labels[name]
-          pc_plus_one = @insts.length
-          blt @labels[name] - pc_plus_one
-        end
-
-        define_method(:jle) do |name|
-          throw 'undefined label' unless @labels[name]
-          pc_plus_one = @insts.length
-          ble @labels[name] - pc_plus_one
-        end
-
-        define_method(:jne) do |name|
-          throw 'undefined label' unless @labels[name]
-          pc_plus_one = @insts.length
-          bne @labels[name] - pc_plus_one
-        end
-      end
-
       def define_exts
         define_registers
         define_label
-        define_jmp
         self.define(:zero, [])
+        InstFactory.register(InstZero)
       end
 
-      alias_method :use, :define_with_inst
 
       def define_function(name, &block)
         define_method(name, &block)
@@ -89,6 +58,7 @@ module SimpleAsm
     use InstArithmetic
     use InstLoadStore
     use InstLiBranch
+    use InstJmp
 
     define_exts
 
@@ -99,14 +69,17 @@ module SimpleAsm
     end
 
     def to_s
+      preassemble
       @insts.map{|inst| inst.to_s }.join("\n")
     end
 
     def to_a
+      preassemble
       @insts
     end
 
     def to_mif(depth=256)
+      preassemble
       mif_text = <<-MIF
 WIDTH=16;
 DEPTH=#{depth};
@@ -129,6 +102,22 @@ CONTENT BEGIN
     private
     def add_inst(inst)
       @insts << inst
+    end
+
+    def preassemble
+      foo =  @insts.map.with_index do |inst, pc|
+        if inst.is_a? InstJmp
+          label_line = @labels[inst.label]
+          throw "label :#{inst.label.to_s} is undefined" unless label_line
+
+          branch_name = inst.to_branch_name
+
+          InstFactory.create(branch_name, { :rb => 0,  :d => label_line - (pc + 1) })
+        else
+          inst
+        end
+      end
+      @insts = foo
     end
   end
 end

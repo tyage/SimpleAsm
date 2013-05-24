@@ -71,6 +71,19 @@ describe Simple do
       s = Simple.new { zero }
       expect(s.to_s).to eq '0000000000000000'
     end
+
+    it 'jmp命令でlabelにjmpする' do
+      s = Simple.new do
+        add r0, r1
+        j :foo
+        sub r0, r1
+        sub r0, r1
+        label :foo
+      end
+
+      jmp = s.to_a[1]
+      expect(jmp).to be_an_instance_of InstLiBranch
+    end
   end
 end
 
