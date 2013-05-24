@@ -6,6 +6,8 @@ require 'simple_asm/inst_li_branch'
 module SimpleAsm
   class Simple
     class << self
+      REGISTER_SIZE = 8
+
       def define(name, symbols)
         define_method name do |*args|
           factory_args = Hash[*symbols.zip(args).flatten(1)]
@@ -21,12 +23,23 @@ module SimpleAsm
         end
       end
 
+      def define_registers
+        (0..REGISTER_SIZE-1).each do |i|
+          name = ('r' + i.to_s).to_sym
+          define_method name do
+            return i
+          end
+        end
+      end
+
       alias_method :use, :define_with_inst
     end
 
     use InstArithmetic
     use InstLoadStore
     use InstLiBranch
+
+    define_registers
 
     def initialize(&block)
       @insts = []
