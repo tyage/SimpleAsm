@@ -46,7 +46,7 @@ module SimpleAsm
     end
 
     def to_s
-      sprintf("%02b%03b%03b%08b", LI_B_CODE, @op2, @rb, @d)
+      sprintf("%.2b%.3b%.3b%.8b", LI_B_CODE, @op2, @rb, @d).gsub(/\./, '1')
     end
 
     private

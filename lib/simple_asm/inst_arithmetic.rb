@@ -47,7 +47,7 @@ module SimpleAsm
     end
 
     def to_s
-      sprintf("%02b%03b%03b%04b%04b", PREFIX_CODE, @rs, @rd, @op3, @d)
+      sprintf("%.2b%.3b%.3b%.4b%.4b", PREFIX_CODE, @rs, @rd, @op3, @d).gsub(/\./, '1')
     end
 
     def to_i
