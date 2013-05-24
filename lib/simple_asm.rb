@@ -2,6 +2,7 @@ require 'simple_asm/inst_factory'
 require 'simple_asm/inst_arithmetic'
 require 'simple_asm/inst_load_store'
 require 'simple_asm/inst_li_branch'
+require 'simple_asm/inst_zero'
 
 module SimpleAsm
   class Simple
@@ -32,6 +33,11 @@ module SimpleAsm
         end
       end
 
+      def define_exts
+        define_registers
+        self.define(:zero, [])
+      end
+
       alias_method :use, :define_with_inst
     end
 
@@ -39,7 +45,7 @@ module SimpleAsm
     use InstLoadStore
     use InstLiBranch
 
-    define_registers
+    define_exts
 
     def initialize(&block)
       @insts = []
@@ -54,8 +60,24 @@ module SimpleAsm
       @insts
     end
 
-    def to_mif
-      # pending
+    def to_mif(depth=256)
+      mif_text = <<-MIF
+WIDTH=16;
+DEPTH=#{depth};
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=BIN;
+
+CONTENT BEGIN
+      MIF
+
+      @insts.each_with_index do |inst, index|
+        mif_text << "\t#{'%03X' % index}  :   #{inst.to_s};\n"
+      end
+
+      mif_text << "\t[#{'%03X' % @insts.length}..#{'%03X' % depth}]  :   #{'%016b' % 0};\n"
+
+      mif_text << "END;\n"
     end
 
     private

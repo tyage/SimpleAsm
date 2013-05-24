@@ -13,3 +13,4 @@ s = Simple.new do
 end
 
 puts s.to_s
+puts s.to_mif

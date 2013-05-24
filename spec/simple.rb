@@ -66,5 +66,11 @@ describe Simple do
       expect(s.to_s).to eq '1011100000000100'
     end
   end
+  describe 'ext instructions' do
+    it 'zero命令' do
+      s = Simple.new { zero }
+      expect(s.to_s).to eq '0000000000000000'
+    end
+  end
 end
 
