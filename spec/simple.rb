@@ -35,5 +35,36 @@ describe Simple do
       expect(@simple.to_s).to eq '1100100000000000'
     end
   end
+
+  describe 'arithmetic instructions' do
+    it 'rd, rs形式' do
+      s = Simple.new { add 0, 1 }
+      expect(s.to_s).to eq '1100100000000000'
+    end
+
+    it 'rd, d形式' do
+      s = Simple.new { sll 1, 4 }
+      expect(s.to_s).to eq '1100000110000100'
+    end
+  end
+
+  describe 'load store instructions' do
+    it '正しく翻訳される' do
+      s = Simple.new { ld 0, 1, 4 }
+      expect(s.to_s).to eq '0000000100000100'
+    end
+  end
+
+  describe 'li branch instructions' do
+    it 'rb, d形式' do
+      s = Simple.new { li 1, 4 }
+      expect(s.to_s).to eq '1000000100000100'
+    end
+
+    it 'branch形式' do
+      s = Simple.new { be 4 }
+      expect(s.to_s).to eq '1011100000000100'
+    end
+  end
 end
 

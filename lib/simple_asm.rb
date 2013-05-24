@@ -43,11 +43,15 @@ module SimpleAsm
 
     def initialize(&block)
       @insts = []
-      self.instance_eval(&block)
+      self.instance_eval(&block) if block
     end
 
     def to_s
       @insts.map{|inst| inst.to_s }.join("\n")
+    end
+
+    def to_a
+      @insts
     end
 
     def to_mif

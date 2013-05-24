@@ -23,7 +23,7 @@ module SimpleAsm
 
     ARGS_TO_NAMES_MAP = {
       [:rd, :rs] => [:add, :sub, :and, :or, :xor, :cmp, :mov],
-      [:rd, :s] => [:sll, :slr, :srl, :sra, :in, :out],
+      [:rd, :d] => [:sll, :slr, :srl, :sra, :in, :out],
       [:d]    => [:hlt]
     }.freeze
 
