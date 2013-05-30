@@ -16,12 +16,29 @@ Simple.define_function(:load_right_stack_base) do |register|
   sll register, 7
 end
 
+Simple.define_function(:load_array_base) do |register|
+  li register, 1
+  sll register, 10
+end
+
+Simple.define_function(:load_array_pointer) do |register, p|
+  load_array_base register
+  add register, p
+end
+
 Simple.define_function(:plus_one) do |register|
   addi register, 1
 end
 
 Simple.define_function(:minus_one) do |register|
   addi register, 0b11111111
+end
+
+Simple.define_function(:swap) do |reg1, reg2|
+  t = r7
+  ld t, reg1, 0
+  st reg2, reg1, 0
+  st t, reg2, 0
 end
 
 Simple.define_function(:inssort) do
@@ -33,8 +50,7 @@ Simple.define_function(:inssort) do
   li n, 1
   sll n, 10
 
-  li i, 1
-  sll i, 10
+  li i, 0
 
   label :for_inssort_1
     # i < n;
@@ -42,7 +58,8 @@ Simple.define_function(:inssort) do
     jle :end_for_inssort_1
 
     # x = a[i]
-    ld x, i, 0
+    load_array_pointer r7, i
+    ld x, r7, 0
 
     # j = i - 1;
     mov j, i
@@ -50,34 +67,38 @@ Simple.define_function(:inssort) do
     label :for_inssort_2
       # j >= 0;
       li r7, 0
-      cmp r7, j
-      jlt :end_for_inssort_2
+      cmp j, r7
+      jlt :end_for_inssort_2 # jmp if j < 0
+
       # a[j] > x;
-      ld r7, j, 0
-      cmp r7, x
-      jle :end_for_inssort_2
+      load_array_pointer r7, j
+      ld r6, r7, 0
+      cmp r6, x
+
+      jle :end_for_inssort_2 # jmp if a[j] - x <= 0
 
       # a[j+1] = a[j]
-      mov r6, j
-      addi r6, 1
+      load_array_pointer r7, j
+      load_array_pointer r6, j
+      plus_one r6
 
-      ld r7, j, 0
-
-      st r7, r6, 0
+      ld r5, r7, 0
+      st r5, r6, 0
 
       # j--;
       minus_one j
       jmp :for_inssort_2
-    label :end_for_inssort_2
-    addi i, 1
+    label :end_for_inssort_3
+    plus_one i
 
-    mov r6, j
-    addi r6, 1
+    # a[j+1] = x;
+    load_array_pointer r6, j
+    plus_one r6
 
     st x, r6, 0
 
     # i++;
-    addi i, 1
+    plus_one i
     jmp :for_inssort_1
   label :end_for_inssort_1
 
@@ -132,12 +153,10 @@ s = Simple.new do
 
     # x = a[(left + right) / 2]
     x = r4
-    left_plus_right = r6
-    mov left_plus_right, left
-    add left_plus_right, right
-    srl left_plus_right, 1
-
-    st left_plus_right, x, 0
+    mov r6, left
+    add r6, right
+    srl r6, 1
+    st r6, x, 0
 
     # i = left; j = right
     i = r6
@@ -153,8 +172,8 @@ s = Simple.new do
         ld a_i, i, 0
         cmp x, a_i
         jle :end_while_i
-        li r7, 1
-        add i, r7
+
+        plus_one i
         jmp :while_i
       label :end_while_i
 
@@ -164,8 +183,8 @@ s = Simple.new do
         ld a_j, j, 0
         cmp a_j, x
         jle :end_while_j
-        li r7, 1
-        sub j, r7
+
+        minus_one j
       label :end_while_j
 
       # if (i >= j) break;
@@ -176,25 +195,20 @@ s = Simple.new do
       label :end_if_i_j
 
       # t = a[i]; a[i] = a[j]; a[j] = t;
-      a_i = r7
-      a_j = r4
-      ld a_i, i, 0
-      ld a_j, j, 0
-      st a_j, i, 0
-      st a_i, j, 0
+      swap i, j
 
       # i++; j--;
-      addi i, 1
+      plus_one i
       minus_one j
     label :end_for2
 
+    # if (i - left > right - j) {
     mov r7, i
     sub r7, left
     mov r4, right
     sub r4, j
     cmp r7, r4
     jle :else_1
-    # if (i - left > right - j) {
       # if (i - left > THRESHOLD)
       mov r7, i
       sub r7, left
@@ -210,25 +224,23 @@ s = Simple.new do
         load_right_stack_base r7
         add r7, p
         mov r4, i
-        li r3, 1
-        sub r4, r3
-        st r3, r7, 0
+        minus_one r4
+        st r4, r7, 0
 
         # p++;
-        addi p, 1
+        plus_one p
       label :end_if_1_1
       # left = j + 1;
       mov r7, j
-      li r4, 1
-      add r7, r4
+      plus_one r7
       mov left, r7
 
       jmp :end_if_1
     # } else {
     label :else_1
       # if (right - j > THRESHOLD)
-      mov r7, i
-      sub r7, left
+      mov r7, right
+      sub r7, j
       li r4, THRESHOLD
       cmp r7, r4
       jle :end_if_1_2
@@ -236,8 +248,7 @@ s = Simple.new do
         load_left_stack_base r7
         add r7, p
         mov r4, j
-        li r3, 1
-        add r4, r3
+        plus_one r4
         st r4, r7, 0
 
         # rightstack[p] = right;
@@ -246,12 +257,11 @@ s = Simple.new do
         st right, r7, 0
 
         # p++;
-        addi p, 1
+        plus_one p
       label :end_if_1_2
       # right = i - 1;
       mov r7, i
-      li r4, 1
-      sub r7, r4
+      minus_one r7
       mov right, r7
     label :end_if_1
 
