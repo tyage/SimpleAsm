@@ -8,6 +8,7 @@ module SimpleAsm
 
     NAME_TO_BRANCH_NAME = {
       :j => :b,
+      :jmp => :b,
       :je => :be,
       :jlt => :blt,
       :jle => :ble,
@@ -15,7 +16,7 @@ module SimpleAsm
     }
 
     ARGS_TO_NAMES_MAP = {
-      [:label] => [:j, :je, :jlt, :jle, :jne]
+      [:label] => [:j, :jmp, :je, :jlt, :jle, :jne]
     }.freeze
 
     class << self
