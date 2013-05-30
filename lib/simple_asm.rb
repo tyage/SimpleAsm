@@ -78,23 +78,24 @@ module SimpleAsm
       @insts
     end
 
-    def to_mif(depth=256)
+    def to_mif(depth=2048)
       preassemble
       mif_text = <<-MIF
 WIDTH=16;
 DEPTH=#{depth};
 
 ADDRESS_RADIX=HEX;
-DATA_RADIX=BIN;
+DATA_RADIX=DEC;
 
 CONTENT BEGIN
       MIF
 
       @insts.each_with_index do |inst, index|
-        mif_text << "\t#{'%03X' % index}  :   #{inst.to_s};\n"
+
+        mif_text << "\t#{'%03x' % index}  :   #{binary_to_decimal(inst.to_s)};\n"
       end
 
-      mif_text << "\t[#{'%03X' % @insts.length}..#{'%03X' % depth}]  :   #{'%016b' % 0};\n"
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
 
       mif_text << "END;\n"
     end
@@ -118,6 +119,10 @@ CONTENT BEGIN
         end
       end
       @insts = foo
+    end
+
+    def binary_to_decimal(binary_str)
+      (binary_str[1..-1].to_i(2) - binary_str[0].to_i * 2**15).to_s
     end
   end
 end
