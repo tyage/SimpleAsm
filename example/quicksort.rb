@@ -16,14 +16,12 @@ Simple.define_function(:load_right_stack_base) do |register|
   sll register, 7
 end
 
-Simple.define_function(:addi) do |register, i|
-  li r7, i
-  add register, r7
+Simple.define_function(:plus_one) do |register|
+  addi register, 1
 end
 
-Simple.define_function(:subi) do |register, i|
-  li r7, i
-  sub register, r7
+Simple.define_function(:minus_one) do |register|
+  addi register, 0b11111111
 end
 
 Simple.define_function(:inssort) do
@@ -48,7 +46,7 @@ Simple.define_function(:inssort) do
 
     # j = i - 1;
     mov j, i
-    subi j, 1
+    minus_one j
     label :for_inssort_2
       # j >= 0;
       li r7, 0
@@ -68,7 +66,7 @@ Simple.define_function(:inssort) do
       st r7, r6, 0
 
       # j--;
-      subi j, 1
+      minus_one j
       jmp :for_inssort_2
     label :end_for_inssort_2
     addi i, 1
@@ -98,9 +96,9 @@ s = Simple.new do
   sll left, 10
 
   # right = 0x7FF
-  li right, 0b11111111
-  sll right, 3
-  li r7, 0b111
+  li right, 0b01111111
+  sll right, 4
+  li r7, 0b1111
   add right, r7
 
   # p = 0
@@ -119,7 +117,7 @@ s = Simple.new do
       je :end_for
 
       # p--;
-      subi p, 1
+      minus_one p
 
       # left = leftstack[p]
       load_left_stack_base r7
@@ -134,23 +132,12 @@ s = Simple.new do
 
     # x = a[(left + right) / 2]
     x = r4
-    counter = r5
-    mov r6, left
-    add r6, right
-    li counter, 0
-    label :divide_2
-      li r7, 2
-      sub r6, r7
+    left_plus_right = r6
+    mov left_plus_right, left
+    add left_plus_right, right
+    srl left_plus_right, 1
 
-      li r7, 0
-      cmp r6, r7
-      jlt :end_divide_2
-
-      addi counter, 1
-      jmp :divide_2
-    label :end_divide_2
-
-    ld x, counter, 0
+    st left_plus_right, x, 0
 
     # i = left; j = right
     i = r6
@@ -198,7 +185,7 @@ s = Simple.new do
 
       # i++; j--;
       addi i, 1
-      subi j, 1
+      minus_one j
     label :end_for2
 
     mov r7, i
@@ -272,6 +259,7 @@ s = Simple.new do
   label :end_for
 
   inssort
+  hlt
 end
 
 puts s.to_mif
