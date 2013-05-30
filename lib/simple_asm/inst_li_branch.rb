@@ -8,11 +8,12 @@ module SimpleAsm
 
     NAME_TO_OP = {
       :li => 0b000,
+      :addi => 0b001,
       :b => 0b100,
       :be => 0b111,
       :blt => 0b111,
       :ble => 0b111,
-      :bne => 0b111
+      :bne => 0b111,
     }.freeze
 
     NAME_TO_COND = {
@@ -23,7 +24,7 @@ module SimpleAsm
     }.freeze
 
     ARGS_TO_NAMES_MAP = {
-      [:rb, :d] => [:li, :b],
+      [:rb, :d] => [:li, :b, :addi],
       [:d] => [:be, :blt, :ble, :bne]
     }.freeze
 
