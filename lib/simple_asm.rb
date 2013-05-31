@@ -100,6 +100,52 @@ CONTENT BEGIN
       mif_text << "END;\n"
     end
 
+    def to_binary_mif(depth=2048)
+      preassemble
+      mif_text = <<-MIF
+WIDTH=16;
+DEPTH=#{depth};
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=BIN;
+
+CONTENT BEGIN
+      MIF
+
+      @insts.each_with_index do |inst, index|
+
+        mif_text << "\t#{'%03x' % index}  :   #{inst.to_s};\n"
+      end
+
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
+
+      mif_text << "END;\n"
+    end
+
+
+    def to_hex_mif(depth=2048)
+      preassemble
+      mif_text = <<-MIF
+WIDTH=16;
+DEPTH=#{depth};
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+      MIF
+
+      @insts.each_with_index do |inst, index|
+
+        mif_text << "\t#{'%03x' % index}  :   #{inst.to_s.to_i(2).to_s(16)};\n"
+      end
+
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
+
+      mif_text << "END;\n"
+    end
+
+
     private
     def add_inst(inst)
       @insts << inst
