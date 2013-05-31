@@ -31,7 +31,8 @@ Simple.define_function(:plus_one) do |register|
 end
 
 Simple.define_function(:minus_one) do |register|
-  addi register, 0b11111111
+  li r7, 1
+  sub register, r7
 end
 
 Simple.define_function(:swap) do |reg1, reg2|
@@ -50,7 +51,7 @@ Simple.define_function(:inssort) do
   li n, 1
   sll n, 10
 
-  li i, 0
+  li i, 1
 
   label :for_inssort_1
     # i < n;
@@ -89,7 +90,6 @@ Simple.define_function(:inssort) do
       minus_one j
       jmp :for_inssort_2
     label :end_for_inssort_2
-    plus_one i
 
     # a[j+1] = x;
     load_array_pointer r6, j
@@ -101,7 +101,6 @@ Simple.define_function(:inssort) do
     plus_one i
     jmp :for_inssort_1
   label :end_for_inssort_1
-
 end
 
 # 0x400 ~ 0x7FFまでの数字ソート
