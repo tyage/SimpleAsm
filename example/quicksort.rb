@@ -88,7 +88,7 @@ Simple.define_function(:inssort) do
       # j--;
       minus_one j
       jmp :for_inssort_2
-    label :end_for_inssort_3
+    label :end_for_inssort_2
     plus_one i
 
     # a[j+1] = x;
