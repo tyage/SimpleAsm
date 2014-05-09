@@ -95,7 +95,7 @@ CONTENT BEGIN
         mif_text << "\t#{'%03x' % index}  :   #{binary_to_decimal(inst.to_s)};\n"
       end
 
-      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % (depth - 1)}]  :   0;\n"
 
       mif_text << "END;\n"
     end
@@ -117,7 +117,7 @@ CONTENT BEGIN
         mif_text << "\t#{'%03x' % index}  :   #{inst.to_s};\n"
       end
 
-      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % (depth - 1)}]  :   0;\n"
 
       mif_text << "END;\n"
     end
@@ -140,7 +140,7 @@ CONTENT BEGIN
         mif_text << "\t#{'%03x' % index}  :   #{inst.to_s.to_i(2).to_s(16)};\n"
       end
 
-      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % depth}]  :   0;\n"
+      mif_text << "\t[#{'%03x' % @insts.length}..#{'%03x' % (depth - 1)}]  :   0;\n"
 
       mif_text << "END;\n"
     end
