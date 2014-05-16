@@ -47,7 +47,10 @@ module SimpleAsm
     end
 
     def to_s
-      sprintf("%.2b%.3b%.3b%.8b", LI_B_CODE, @op2, @rb, @d).gsub(/\./, '1')
+      # limit d.size <= 8
+      d = sprintf("%.8b", @d).gsub(/\,/, '1')
+      d = d[d.size - 8, d.size - 1] if d.size > 8
+      sprintf("%.2b%.3b%.3b%s", LI_B_CODE, @op2, @rb, d).gsub(/\./, '1')
     end
 
     private
